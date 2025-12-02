@@ -49,6 +49,12 @@ The code only requires that:
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
+windows:
+```bash
+  python -m venv .venv
+  .venv\Scripts\activate
+```
+
 2. Install dependencies
 
 ```bash
@@ -118,11 +124,23 @@ dataset, feature_strategy, k, classifier,
 accuracy, precision, recall, f1.
 
 5. Running the Experiments
-
+macOS/Linux:
 ```bash
 python3 main.py \
   --sms_path data/spam.csv \
   --second_dataset_path data/email_text.csv \
+  --second_text_col text \
+  --second_label_col label \
+  --output_csv results.csv \
+  --top_k 500 1000
+
+```
+
+windows:
+```bash
+python3 main.py \
+  --sms_path data\spam.csv \
+  --second_dataset_path data\email_text.csv \
   --second_text_col text \
   --second_label_col label \
   --output_csv results.csv \
