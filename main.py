@@ -19,7 +19,7 @@ Usage example (after setting up datasets):
 import argparse
 from pathlib import Path
 
-from src.experiment import run_full_experiment
+from src.experiment import run_full_experiment, run_dataset_1_experiment, run_dataset_2_experiment
 
 
 def parse_args() -> argparse.Namespace:
@@ -46,24 +46,6 @@ def parse_args() -> argparse.Namespace:
         help="Path to second spam dataset CSV file.",
     )
     parser.add_argument(
-        "--second_text_col",
-        type=str,
-        required=True,
-        help="Name of the text column in the second dataset CSV.",
-    )
-    parser.add_argument(
-        "--second_label_col",
-        type=str,
-        required=True,
-        help="Name of the label column in the second dataset CSV.",
-    )
-    parser.add_argument(
-        "--output_csv",
-        type=str,
-        default="results.csv",
-        help="Path to save the experiment results as CSV.",
-    )
-    parser.add_argument(
         "--top_k",
         type=int,
         nargs="*",
@@ -80,18 +62,30 @@ def main() -> None:
     """
     args = parse_args()
 
-    results_df = run_full_experiment(
-        sms_path=args.sms_path,
-        second_dataset_path=args.second_dataset_path,
-        second_text_col=args.second_text_col,
-        second_label_col=args.second_label_col,
-        top_k_list=args.top_k,
-    )
+    # results_df = run_full_experiment(
+    #     sms_path=args.sms_path,
+    #     second_dataset_path=args.second_dataset_path,
+    #     second_text_col=args.second_text_col,
+    #     second_label_col=args.second_label_col,
+    #     top_k_list=args.top_k,
+    # )
+    #
+    # output_path = Path(args.output_csv)
+    # output_path.parent.mkdir(parents=True, exist_ok=True)
+    # results_df.to_csv(output_path, index=False)
+    # print(f"Saved results to {output_path}")
 
-    output_path = Path(args.output_csv)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    results_df.to_csv(output_path, index=False)
-    print(f"Saved results to {output_path}")
+    result_ds_1 = run_dataset_1_experiment(sms_path=args.sms_path, top_k_list=args.top_k)
+    output_path_ds_1 = Path("results_ds_1.csv")
+    output_path_ds_1.parent.mkdir(parents=True, exist_ok=True)
+    result_ds_1.to_csv(output_path_ds_1, index=False)
+    print(f"Saved results to {output_path_ds_1}")
+
+    result_ds_2 = run_dataset_2_experiment(second_dataset_path=args.second_dataset_path, top_k_list=args.top_k)
+    output_path_ds_2 = Path("results_ds_2.csv")
+    output_path_ds_2.parent.mkdir(parents=True, exist_ok=True)
+    result_ds_2.to_csv(output_path_ds_2, index=False)
+    print(f"Saved results to {output_path_ds_2}")
 
 
 if __name__ == "__main__":
