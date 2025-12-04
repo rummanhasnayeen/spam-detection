@@ -3,7 +3,7 @@ Data loading utilities for the spam classification project.
 
 This module is responsible for:
 - Loading different datasets from disk
-- Normalizing them into a common format: columns ['text', 'label']
+- Normalizing them into a common format: columns ['text', 'label'](1st dataset has v1,v2 columns)
 - Converting labels into numeric form (0 = ham, 1 = spam)
 """
 
@@ -33,11 +33,9 @@ def _normalize_labels(df: pd.DataFrame, label_col: str) -> pd.Series:
     labels = df[label_col].astype(str).str.lower().str.strip()
     return (labels == "spam").astype(int)
 
-
-import pandas as pd
-
 def load_sms_spam_dataset(path: str) -> pd.DataFrame:
     """
+    Referenced as 1st dataset throughout the project
     Load the SMS spam dataset from CSV and normalize column names.
 
     Supports the popular 'spam.csv' format with columns:
@@ -53,11 +51,10 @@ def load_sms_spam_dataset(path: str) -> pd.DataFrame:
     # Use latin-1 because the popular SMS Spam Collection is not pure UTF-8
     df = pd.read_csv(path, encoding="latin-1")
 
-    # If the file has v1/v2 (typical Kaggle/UCI format)
+    # If the file has v1/v2 (Kaggle)
     if {"v1", "v2"}.issubset(df.columns):
         df = df.rename(columns={"v1": "class", "v2": "sms"})
 
-    # Now we expect 'class' and 'sms'
     expected_cols = {"class", "sms"}
     if not expected_cols.issubset(df.columns):
         raise ValueError(
@@ -65,7 +62,6 @@ def load_sms_spam_dataset(path: str) -> pd.DataFrame:
             f"but got {list(df.columns)}"
         )
 
-    # Keep only the relevant columns
     df = df[["class", "sms"]].copy()
 
     # Normalize column names to match the rest of the pipeline
@@ -86,37 +82,36 @@ def load_sms_spam_dataset(path: str) -> pd.DataFrame:
     return df
 
 
-
-
-def load_email_spam_dataset(path: str = "data/email_text.csv") -> pd.DataFrame:
-    """
-    Load the email spam dataset from email_text.csv.
-
-    Expected columns:
-      - 'label': 0 (ham) or 1 (spam)
-      - 'text' : email body
-
-    Returns a DataFrame with standardized columns:
-      - 'text'
-      - 'label' (1 = spam, 0 = ham)
-    """
-    df = pd.read_csv(path)
-
-    # Ensure we only keep the two columns we need
-    df = df[["label", "text"]].copy()
-
-    # If label is 0/1, we keep as-is (0 = ham, 1 = spam)
-    # Just make sure it's integer
-    df["label"] = df["label"].astype(int)
-
-    # Drop any rows with missing text or labels
-    df.dropna(subset=["text", "label"], inplace=True)
-
-    return df
+# def load_email_spam_dataset(path: str = "data/email_text.csv") -> pd.DataFrame:
+#     """
+#     Referenced as 2nd dataset throughout the project
+#     Load the email spam dataset from email_text.csv.
+#
+#     Expected columns:
+#       - 'label': 0 (ham) or 1 (spam)
+#       - 'text' : email body
+#
+#     Returns a DataFrame with standardized columns:
+#       - 'text'
+#       - 'label' (1 = spam, 0 = ham)
+#     """
+#     df = pd.read_csv(path)
+#
+#     # Ensure we only keep the two columns we need
+#     df = df[["label", "text"]].copy()
+#
+#     # If label is 0/1, we keep as-is (0 = ham, 1 = spam)
+#     df["label"] = df["label"].astype(int)
+#
+#     # Drop any rows with missing text or labels
+#     df.dropna(subset=["text", "label"], inplace=True)
+#
+#     return df
 
 
 def load_generic_spam_dataset(path: str, text_col: str, label_col: str) -> pd.DataFrame:
     """
+    Referenced as 2nd dataset throughout the project
     Load a second spam dataset (e.g., SpamAssassin, Enron spam, etc.)
     from a CSV file and normalize it.
 

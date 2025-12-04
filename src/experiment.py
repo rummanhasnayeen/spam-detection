@@ -30,9 +30,10 @@ from .evaluation import train_test_split_texts, evaluate_classifier
 
 
 def _run_single_dataset_experiments(
-    df: pd.DataFrame,
-    dataset_name: str,
-    top_k_list: List[int],
+        df: pd.DataFrame,
+        dataset_name: str,
+        top_k_list: List[int],
+        use_stemming: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Run all experiments for a single dataset.
@@ -45,13 +46,14 @@ def _run_single_dataset_experiments(
         Name of the dataset (for reporting).
     top_k_list : List[int]
         List of k values for feature selection.
+    stemming : bool, optional
 
     Returns
     -------
     List[Dict[str, Any]]
         List of result dictionaries for each experiment setting.
     """
-    df = preprocess_dataframe(df, text_col="text")
+    df = preprocess_dataframe(df, text_col="text", use_stemming=use_stemming)
 
     texts = df["text"].values
     labels = df["label"].values.astype(int)
@@ -120,31 +122,28 @@ def _run_single_dataset_experiments(
 
     return results
 
+
 def run_dataset_1_experiment(
-    sms_path: str,
-    top_k_list: List[int] | None = None,
+        sms_path: str,
+        top_k_list: List[int] | None = None,
+        stemming:bool = False
 ) -> pd.DataFrame:
     """
-    Run the full comparative experiment across two datasets.
+    Run the experiment across first dataset.
 
     Parameters
     ----------
     sms_path : str
         Path to the SMS spam dataset CSV file.
-    second_dataset_path : str
-        Path to the second spam dataset CSV file.
-    second_text_col : str
-        Name of the text column in the second dataset.
-    second_label_col : str
-        Name of the label column in the second dataset.
     top_k_list : List[int] | None, optional
         List of k values for feature selection.
         If None, defaults to [500, 1000].
+    stemming : bool, optional
 
     Returns
     -------
     pd.DataFrame
-        DataFrame summarizing all experiment results.
+        DataFrame summarizing experiment results.
     """
     if sms_path is None:
         sms_path = "data\spam.csv"
@@ -155,36 +154,33 @@ def run_dataset_1_experiment(
     # Dataset 1: SMS spam
     sms_df = load_sms_spam_dataset(sms_path)
     results_sms = _run_single_dataset_experiments(
-        sms_df, dataset_name="sms_spam", top_k_list=top_k_list
+        sms_df, dataset_name="sms_spam", top_k_list=top_k_list, use_stemming=stemming
     )
 
     return pd.DataFrame(results_sms)
 
+
 def run_dataset_2_experiment(
-    second_dataset_path: str,
-    top_k_list: List[int] | None = None,
+        second_dataset_path: str,
+        top_k_list: List[int] | None = None,
+        stemming:bool = False
 ) -> pd.DataFrame:
     """
-    Run the full comparative experiment across two datasets.
+    Run the experiment across second dataset.
 
     Parameters
     ----------
-    sms_path : str
-        Path to the SMS spam dataset CSV file.
     second_dataset_path : str
         Path to the second spam dataset CSV file.
-    second_text_col : str
-        Name of the text column in the second dataset.
-    second_label_col : str
-        Name of the label column in the second dataset.
     top_k_list : List[int] | None, optional
         List of k values for feature selection.
         If None, defaults to [500, 1000].
+    stemming : bool, optional
 
     Returns
     -------
     pd.DataFrame
-        DataFrame summarizing all experiment results.
+        DataFrame summarizing experiment results.
     """
     if top_k_list is None:
         top_k_list = [500, 1000]
@@ -192,66 +188,15 @@ def run_dataset_2_experiment(
     if second_dataset_path is None:
         second_dataset_path = "data\email_text.csv"
 
-    second_text_col="text"
-    second_label_col="label"
+    second_text_col = "text"
+    second_label_col = "label"
 
-    # Dataset 2: generic (e.g., SpamAssassin / Enron)
+    # Dataset 2: generic (Enron)
     ds2_df = load_generic_spam_dataset(
         second_dataset_path, text_col=second_text_col, label_col=second_label_col
     )
     results_ds2 = _run_single_dataset_experiments(
-        ds2_df, dataset_name="second_dataset", top_k_list=top_k_list
+        ds2_df, dataset_name="second_dataset", top_k_list=top_k_list, use_stemming=stemming
     )
 
     return pd.DataFrame(results_ds2)
-
-
-def run_full_experiment(
-    sms_path: str,
-    second_dataset_path: str,
-    second_text_col: str,
-    second_label_col: str,
-    top_k_list: List[int] | None = None,
-) -> pd.DataFrame:
-    """
-    Run the full comparative experiment across two datasets.
-
-    Parameters
-    ----------
-    sms_path : str
-        Path to the SMS spam dataset CSV file.
-    second_dataset_path : str
-        Path to the second spam dataset CSV file.
-    second_text_col : str
-        Name of the text column in the second dataset.
-    second_label_col : str
-        Name of the label column in the second dataset.
-    top_k_list : List[int] | None, optional
-        List of k values for feature selection.
-        If None, defaults to [500, 1000].
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame summarizing all experiment results.
-    """
-    if top_k_list is None:
-        top_k_list = [500, 1000]
-
-    # # Dataset 1: SMS spam
-    # sms_df = load_sms_spam_dataset(sms_path)
-    # results_sms = _run_single_dataset_experiments(
-    #     sms_df, dataset_name="sms_spam", top_k_list=top_k_list
-    # )
-
-    # Dataset 2: generic (e.g., SpamAssassin / Enron)
-    ds2_df = load_generic_spam_dataset(
-        second_dataset_path, text_col=second_text_col, label_col=second_label_col
-    )
-    results_ds2 = _run_single_dataset_experiments(
-        ds2_df, dataset_name="second_dataset", top_k_list=top_k_list
-    )
-
-    # all_results = results_sms + results_ds2
-    all_results = results_ds2
-    return pd.DataFrame(all_results)

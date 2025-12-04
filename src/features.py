@@ -4,7 +4,7 @@ Feature extraction and feature selection utilities.
 This module:
 - Transforms text into vector representations (TF-IDF)
 - Implements custom chi-square and mutual information
-  feature selection from scratch (no sklearn.feature_selection).
+  feature selection from scratch.
 """
 from __future__ import annotations
 
